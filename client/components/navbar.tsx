@@ -6,10 +6,23 @@ import {
   walletConnect,
   localWallet,
   Web3Button,
-  useAddress
+  useAddress,
+  useContractRead,
+  useContract
 } from "@thirdweb-dev/react";
 
 export default function Navbar({ address }: { address: string }) {
+  const { contract } = useContract("0x9D1260420c895D682d9BE7298d15D0E6343ce440");
+  const { data: Rawfee, isLoading } = useContractRead(contract, "getFee", [5, "0x0000000000000000000000000000000000000000"])
+  const ethers = require('ethers');
+
+  let fee = parseInt(Rawfee, 16);
+  let weiValue = ethers.utils.parseEther(fee.toString());
+
+  console.log("Rawfee" + Rawfee);
+  console.log("fee" + fee);
+  console.log("weiValue" + weiValue);
+  // console.log("Fee" + fee);
 
   return (
     <nav className="fixed z-30 flex items-center justify-between w-full p-6">
@@ -28,7 +41,10 @@ export default function Navbar({ address }: { address: string }) {
   contractAddress="0x5Bc93bF040Deed78b63214f4F37FA82A3c30e1cA"
   action={(contract) => {
     contract.call("mint", [["0x129f33143e97e28E19CD2fBAAF7869DE40d3Bb7f", "0x129f33143e97e28E19CD2fBAAF7869DE40d3Bb7f", "0x129f33143e97e28E19CD2fBAAF7869DE40d3Bb7f", "0x129f33143e97e28E19CD2fBAAF7869DE40d3Bb7f", "0x129f33143e97e28E19CD2fBAAF7869DE40d3Bb7f"], ["0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8", "0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8", "0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8", "0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8", "0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8"]
-      , [0, 0, 0, 0, 0], 0x0000000000000000000000000000000000000000, ["123", "123", "123", "123", "123"], address])
+      , [0, 0, 0, 0, 0], "0x0000000000000000000000000000000000000000", ["123", "123", "123", "123", "123"], address])
+  }}
+  overrides={{
+    value: weiValue, // 1 ETH in wei
   }}
 >
   Bulk up
