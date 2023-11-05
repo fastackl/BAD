@@ -1,0 +1,10 @@
+.DS_Store
+archive
+node_modules
+cache
+.env
+typechain-types
+deployments
+typechain
+deployments
+artifacts
