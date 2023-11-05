@@ -6,14 +6,14 @@ import Popup from "reactjs-popup";
 import Slider from './ui/slider';
 import Points from './ui/points';
 
-const rawData: { name: string; group: number; points: number; }[] = require("../app/data/data.json");
+const rawData: { address: string; group: number; points: number; }[] = require("../app/data/data.json");
 
-const convertPointsToDimensions = (data: { name: string; group: number; points: number; }[]): CustomNode[] => {
+const convertPointsToDimensions = (data: { address: string; group: number; points: number; }[]): CustomNode[] => {
   return data.map(d => ({ ...d, width: d.points, height: d.points, points: d.points }));
 };
 
 interface CustomNode extends d3.SimulationNodeDatum {
-  name: string;
+  address: string;
   group: number;
   width: number;
   height: number;
@@ -97,7 +97,7 @@ const Arena: React.FC = () => {
       .selectAll("text")
       .data(data)
       .join("text")
-      .text(d => d.name)
+      .text(d => d.address)
       .attr("x", d => d.x ?? 0)
       .attr("y", d => d.y ?? 0)
       .style("text-anchor", "middle")
@@ -156,7 +156,7 @@ const Arena: React.FC = () => {
           <div className={`flex flex-col text-white ${currentGroup === 2 ? 'bg-violet' : 'bg-eet'} bg-opacity-20 backdrop-blur-2xl border-white border-opacity-20 border text-black p-4 rounded-md min-w-[300px] h-[300px] w-full justify-between`}>
             <div className='flex flex-col gap-4 h-full'>
               <div className='flex flex-row gap-1 text-white justify-between pb-3 border-b border-white border-opacity-30'>
-                <h2 className='font-bold text-xl'>{currentNode.name}</h2>
+                <h2 className='font-bold text-xl'>{currentNode.address}</h2>
                 <Points label={currentNode.points.toString()} />
               </div>
               <div className='flex flex-col gap-3 h-full center'>

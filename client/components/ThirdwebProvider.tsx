@@ -1,7 +1,7 @@
 "use client";
 
 export { ThirdwebProvider, ConnectWallet,
-    metamaskWallet,
+    metamaskWallet, useContract, useContractRead, 
     coinbaseWallet, 
     walletConnect, } from "@thirdweb-dev/react";
 
