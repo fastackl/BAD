@@ -25,8 +25,7 @@
     "react-dom": "^18",
     "reactjs-popup": "^2.0.6",
     "tailwind-merge": "^2.0.0",
-    "tailwindcss-animate": "^1.0.7",
-    "truncate-eth-address": "^1.0.2"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/d3": "^7.4.2",
