@@ -18,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <ThirdwebProvider activeChain={Goerli}>
+      <ThirdwebProvider activeChain={Goerli} clientId='cec150b891bf0e6fc160d0f1664d51ac'>
         <body className={inter.className}>{children}</body>
       </ThirdwebProvider>
     </html>
