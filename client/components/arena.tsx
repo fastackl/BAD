@@ -12,6 +12,31 @@ const convertPointsToDimensions = (data: { name: string; group: number; points: 
   return data.map(d => ({ ...d, width: d.points, height: d.points, points: d.points }));
 };
 
+function factorial(n: number): number {
+  if (n === 0) {
+    return 1;
+  } else {
+    return n * factorial(n - 1);
+  }
+}
+
+function binomialCoefficient(n: number, k: number): number {
+  return factorial(n) / (factorial(k) * factorial(n - k));
+}
+
+function binomialProbability(p: number, q: number, n: number, k: number): number {
+  return binomialCoefficient(n, k) * Math.pow(p, k) * Math.pow(q, n - k);
+}
+
+function calculateWinProbability(stakes: number, opponentPoints: number): number {
+  let winProbability = 0;
+  for (let i = opponentPoints; i <= stakes; i++) {
+    winProbability += binomialProbability(0.5, 0.5, stakes, i);
+  }
+  return winProbability;
+}
+
+
 interface CustomNode extends d3.SimulationNodeDatum {
   name: string;
   group: number;
@@ -29,6 +54,7 @@ interface ArenaProps {
 
 const Arena: React.FC<ArenaProps> = ({ data }) => {
   const convertedData: CustomNode[] = convertPointsToDimensions(data);
+  const [winProbability, setWinProbability] = useState(0);
   const ref = useRef<SVGSVGElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [currentNode, setCurrentNode] = useState<CustomNode | null>(null);
@@ -36,6 +62,28 @@ const Arena: React.FC<ArenaProps> = ({ data }) => {
 
   const [xPos, setXPos] = useState(0);
   const [yPos, setYPos] = useState(0);
+
+
+  const [sliderValue, setSliderValue] = useState(1);
+  const [textInputValue, setTextInputValue] = useState('');
+
+  const handleSliderChange = (value: number) => {
+    setSliderValue(value);
+    if (currentNode) {
+      const calculatedWinProbability = calculateWinProbability(value, currentNode.points);
+      setWinProbability(calculatedWinProbability);
+      console.log('Win probability:', calculatedWinProbability);
+    }
+  };
+
+  const handleTextInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTextInputValue(event.target.value);
+  };
+
+  useEffect(() => {
+    console.log('Slider value:', sliderValue);
+    console.log('Text input value:', textInputValue);
+  }, [sliderValue, textInputValue]);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -101,23 +149,27 @@ const Arena: React.FC<ArenaProps> = ({ data }) => {
           .style("fill-opacity", 0.1);
       });
 
-    node.on("click", (event, d) => {
-      // Check if the name of the node matches the name of the fourth element
-      const isMatch = d.name === data[3].name;
-      // If it matches, return early to prevent the click action
-      if (isMatch) {
-        return;
-      }
-
-      setCurrentNode(d);
-      setCurrentGroup(d.group);
-      setIsOpen(true);
-      const popupHeight = 360; // height of the popup
-      const buffer = 24; // buffer space
-      const minYPos = window.innerHeight - popupHeight - buffer;
-      setXPos(event.clientX);
-      setYPos(Math.min(event.clientY, minYPos));
-    });
+      node.on("click", (event, d) => {
+        // Check if the name of the node matches the name of the fourth element
+        const isMatch = d.name === data[3].name;
+        // If it matches, return early to prevent the click action
+        if (isMatch) {
+          return;
+        }
+      
+        setCurrentNode(d);
+        setCurrentGroup(d.group);
+        setIsOpen(true);
+        const popupHeight = 360; // height of the popup
+        const buffer = 24; // buffer space
+        const minYPos = window.innerHeight - popupHeight - buffer;
+        setXPos(event.clientX);
+        setYPos(Math.min(event.clientY, minYPos));
+      
+        // Calculate win probability as soon as the node is clicked
+        const calculatedWinProbability = calculateWinProbability(sliderValue, d.points);
+        setWinProbability(calculatedWinProbability);
+      });
 
     const labels = svg.append("g")
       .selectAll("text")
@@ -194,21 +246,22 @@ const Arena: React.FC<ArenaProps> = ({ data }) => {
               <p className='text-xs'>{`Index: ${currentNode.index}`}</p>
               <div className='flex flex-col gap-3 h-full center'>
                 <div className='flex flex-col gap-0 center'>
-                  <h2 className='font-bold text-3xl'>50%</h2>
+                <h2 className='font-bold text-3xl'>{(winProbability * 100).toFixed(1)}%</h2>
                   <p className='text-xs'>Win Probability</p>
                 </div>
-                <Slider defaultValue={1} maxValue={data[3].points} step={1} />
-                <input type="text" className="w-full px-3 py-2 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none" placeholder="Intent" />
+                <Slider
+                  defaultValue={1}
+                  maxValue={data[3].points}
+                  step={1}
+                  onChange={handleSliderChange} // Add this line
+                />
+                <input type="text" className="w-full px-3 py-2 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none" placeholder="Intent" onChange={handleTextInputChange}/>
               </div>
             </div>
             <Web3Button
               contractAddress="0x1e3ae9a1ceDE4Cd9F5331afF434ADCBEa4189019"
               action={(contract) => {
-                const inputElement = document.querySelector('input');
-                const intentInput = inputElement ? inputElement.value : '';
-                const sliderElement = document.querySelector('.slider') as HTMLInputElement;
-                const sliderValue = sliderElement ? sliderElement.value : '1';
-                contract.call("challenge", [currentNode.index, sliderValue, "For Frodo!"])
+                contract.call("challenge", [currentNode.index, sliderValue, textInputValue])
               }}
             >
               Challenge

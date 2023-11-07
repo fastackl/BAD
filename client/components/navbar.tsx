@@ -6,7 +6,6 @@ import {
   walletConnect,
   localWallet,
   Web3Button,
-  useAddress,
   useContractRead,
   useContract
 } from "@thirdweb-dev/react";
@@ -15,7 +14,7 @@ export default function Navbar({ address }: { address: string }) {
   const { contract } = useContract("0x9D1260420c895D682d9BE7298d15D0E6343ce440");
   const { data: rawFee, isLoading } = useContractRead(contract, "getFee", [5, "0x0000000000000000000000000000000000000000"])
   const ethers = require('ethers');
-  let fee;
+  let fee: string;
   if (rawFee !== undefined) {
     fee = ethers.utils.formatUnits(rawFee, 'wei');
   }
@@ -43,7 +42,7 @@ export default function Navbar({ address }: { address: string }) {
           value: fee
         }
       )
-  }}
+  }}        
 >
   Bulk up
 </Web3Button>
@@ -52,7 +51,6 @@ export default function Navbar({ address }: { address: string }) {
           modalSize={"compact"}
         />
         </div>
-
       </ThirdwebProvider>
     </nav>
   );
